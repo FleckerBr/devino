@@ -1,0 +1,4 @@
+git+ssh://github.com-FleckerBr/FleckerBr/fbs-pro.git
+pyserial==3.5
+PySide2==5.15.2
+QtDesign==0.1.0
