@@ -130,38 +130,59 @@ class ArduinoDesign(QMainWindow):
         self.svg_arduino_uno.setMinimumWidth(256)
         self.frm_arduino_svg.layout().addWidget(self.svg_arduino_uno)
 
+        
+        self.btn_a0.clicked.connect(lambda: self.read_analog("A0"))
+        self.btn_a1.clicked.connect(lambda: self.read_analog("A1"))
+        self.btn_a2.clicked.connect(lambda: self.read_analog("A2"))
+        self.btn_a3.clicked.connect(lambda: self.read_analog("A3"))
+        self.btn_a4.clicked.connect(lambda: self.read_analog("A4"))
+        self.btn_a5.clicked.connect(lambda: self.read_analog("A5"))
+
+        self.btn_d2.clicked.connect(lambda: self.read_digital("D2"))
+        self.btn_d3.clicked.connect(lambda: self.read_digital("D3"))
+        self.btn_d4.clicked.connect(lambda: self.read_digital("D4"))
+        self.btn_d5.clicked.connect(lambda: self.read_digital("D5"))
+        self.btn_d6.clicked.connect(lambda: self.read_digital("D6"))
+        self.btn_d7.clicked.connect(lambda: self.read_digital("D7"))
+        self.btn_d8.clicked.connect(lambda: self.read_digital("D8"))
+        self.btn_d9.clicked.connect(lambda: self.read_digital("D9"))
+        self.btn_d10.clicked.connect(lambda: self.read_digital("D10"))
+        self.btn_d11.clicked.connect(lambda: self.read_digital("D11"))
+        self.btn_d12.clicked.connect(lambda: self.read_digital("D12"))
+        self.btn_d13.clicked.connect(lambda: self.read_digital("D13"))
+
         # Generate dictionary of controls displays
-        self.analog_widgets: dict[str, QLineEdit] = {
-            "A0": self.le_a0,
-            "A1": self.le_a1,
-            "A2": self.le_a2,
-            "A3": self.le_a3,
-            "A4": self.le_a4,
-            "A5": self.le_a5
+        self.analog_widgets: dict[str, tuple[QPushButton, QLineEdit]] = {
+            "A0": (self.btn_a0, self.le_a0),
+            "A1": (self.btn_a1, self.le_a1),
+            "A2": (self.btn_a2, self.le_a2),
+            "A3": (self.btn_a3, self.le_a3),
+            "A4": (self.btn_a4, self.le_a4),
+            "A5": (self.btn_a5, self.le_a5)
         }
 
-        self.digital_widgets: dict[str, tuple[QPushButton, Optional[QStackedWidget]]] = {
-            "D2": (self.btn_d2_mode, None),
-            "D3": (self.btn_d3_mode, self.swgt_d3),
-            "D4": (self.btn_d4_mode, None),
-            "D5": (self.btn_d5_mode, self.swgt_d5),
-            "D6": (self.btn_d6_mode, self.swgt_d6),
-            "D7": (self.btn_d7_mode, None),
-            "D8": (self.btn_d8_mode, None),
-            "D9": (self.btn_d9_mode, self.swgt_d9),
-            "D10": (self.btn_d10_mode, self.swgt_d10),
-            "D11": (self.btn_d11_mode, self.swgt_d11),
-            "D12": (self.btn_d12_mode, None),
-            "D13": (self.btn_d13_mode, None)
+        self.digital_widgets: dict[str, tuple[QPushButton, QPushButton, Optional[QStackedWidget]]] = {
+            "D2": (self.btn_d2, self.btn_d2_mode, None),
+            "D3": (self.btn_d3, self.btn_d3_mode, self.swgt_d3),
+            "D4": (self.btn_d4, self.btn_d4_mode, None),
+            "D5": (self.btn_d5, self.btn_d5_mode, self.swgt_d5),
+            "D6": (self.btn_d6, self.btn_d6_mode, self.swgt_d6),
+            "D7": (self.btn_d7, self.btn_d7_mode, None),
+            "D8": (self.btn_d8, self.btn_d8_mode, None),
+            "D9": (self.btn_d9, self.btn_d9_mode, self.swgt_d9),
+            "D10": (self.btn_d10, self.btn_d10_mode, self.swgt_d10),
+            "D11": (self.btn_d11, self.btn_d11_mode, self.swgt_d11),
+            "D12": (self.btn_d12, self.btn_d12_mode, None),
+            "D13": (self.btn_d13, self.btn_d13_mode, None)
         }
 
-        self.pwm_widgets: dict[str, tuple[QSpinBox, QStackedWidget]] = {
-            "A3": (self.sbx_d3_pwm, self.swgt_d3),
-            "A5": (self.sbx_d5_pwm, self.swgt_d5),
-            "A6": (self.sbx_d6_pwm, self.swgt_d6),
-            "A9": (self.sbx_d9_pwm, self.swgt_d9),
-            "A10": (self.sbx_d10_pwm, self.swgt_d10),
-            "A11": (self.sbx_d11_pwm, self.swgt_d11)
+        self.pwm_widgets: dict[str, tuple[QPushButton, QSpinBox, QStackedWidget]] = {
+            "A3": (self.btn_d3, self.sbx_d3_pwm, self.swgt_d3),
+            "A5": (self.btn_d5, self.sbx_d5_pwm, self.swgt_d5),
+            "A6": (self.btn_d6, self.sbx_d6_pwm, self.swgt_d6),
+            "A9": (self.btn_d9, self.sbx_d9_pwm, self.swgt_d9),
+            "A10": (self.btn_d10, self.sbx_d10_pwm, self.swgt_d10),
+            "A11": (self.btn_d11, self.sbx_d11_pwm, self.swgt_d11)
         }
 
     def save_lib(self):
@@ -234,13 +255,13 @@ class ArduinoDesign(QMainWindow):
         self.te_serial_monitor.insertPlainText(msg)
 
     def update_analog_display(self, data: str):
-        line_edit = self.analog_widgets.get(data.split(" ")[0][1:], None)
+        line_edit = self.analog_widgets.get(data.split(" ")[0][1:], (None, None))[1]
         if line_edit is not None and not line_edit.text() == data.split(" ")[1]: line_edit.setText(data.split(" ")[1])
 
     def update_pwm_display(self, data: str):
-        pwm_widget = self.pwm_widgets.get(data.split(" ")[0][1:], (None, None))
-        spinbox = pwm_widget[0]
-        stacked_widget = pwm_widget[1]
+        pwm_widgets = self.pwm_widgets.get(data.split(" ")[0][1:], (None, None, None))
+        spinbox = pwm_widgets[1]
+        stacked_widget = pwm_widgets[2]
 
         if spinbox is not None:
             spinbox.setValue(int(data.split(" ")[1]))
@@ -248,27 +269,50 @@ class ArduinoDesign(QMainWindow):
                 stacked_widget.setCurrentIndex(1)
                 spinbox.setEnabled(True)
                 spinbox.setKeyboardTracking(False)
-                spinbox.valueChanged.connect(lambda: self.set_pwm(data[2], spinbox))
+                spinbox.valueChanged.connect(lambda: self.write_pwm(data[2]))
 
     def update_digital_display(self, data: str, writeable: bool):
-        digital_widget = self.digital_widgets.get(data.split(" ")[0][1:], (None, None))
-        button = digital_widget[0]
-        stacked_widget = digital_widget[1]
+        digital_widgets = self.digital_widgets.get(data.split(" ")[0][1:], (None, None, None))
+        button = digital_widgets[1]
 
         if button is not None:
             button.setText("HIGH" if int(data.split(" ")[1]) > 0 else "LOW")
             if writeable and not button.isEnabled():
                 button.setEnabled(True)
-                button.clicked.connect(lambda: self.set_digital(data[2], button))
+                button.clicked.connect(lambda: self.write_digital(data[2]))
 
-    def set_digital(self, pin: int, button: QPushButton):
-        button_text = button.text()
-        button.setText("HIGH" if button_text == "LOW" else "LOW")
-        self.send_message(bytes("<set d {} {}>".format(pin, 0 if button_text == "HIGH" else 1), 'utf-8'))
+    def read_analog(self, pin: str):
+        button = self.analog_widgets.get(pin, (None, None))[0]
+        if button is not None:
+            button.setFlat(True)
+            self.send_message(bytes("<get a {}>".format(pin[1:]), 'utf-8'))
 
-    def set_pwm(self, pin: int, spinbox: QSpinBox):
-        if spinbox.hasFocus(): spinbox.clearFocus()
-        self.send_message(bytes("<set a {} {}>".format(pin, spinbox.value()), 'utf-8'))
+    def read_digital(self, pin: str):
+        button = self.digital_widgets.get(pin, (None, None, None))[0]
+        if button is not None:
+            button.setFlat(True)
+            self.send_message(bytes("<get d {}>".format(pin[1:]), 'utf-8'))
+
+    def write_digital(self, pin: int):
+        digital_widgets = self.digital_widgets.get(f"D{pin}", None)
+        if digital_widgets is not None:
+            read_button = digital_widgets[0]
+            mode_button = digital_widgets[1]
+
+            read_button.setFlat(False)
+            button_text = mode_button.text()
+            mode_button.setText("HIGH" if button_text == "LOW" else "LOW")
+            self.send_message(bytes("<set d {} {}>".format(pin, 0 if button_text == "HIGH" else 1), 'utf-8'))
+
+    def write_pwm(self, pin: int):
+        pwm_widgets = self.pwm_widgets.get(f"A{pin}", None)
+        if pwm_widgets is not None:
+            read_button = pwm_widgets[0]
+            pwm_spinbox = pwm_widgets[1]
+
+            read_button.setFlat(False)
+            if pwm_spinbox.hasFocus(): pwm_spinbox.clearFocus()
+            self.send_message(bytes("<set a {} {}>".format(pin, pwm_spinbox.value()), 'utf-8'))
 
     def closeEvent(self, event: QCloseEvent) -> None:
         return super().closeEvent(event)
