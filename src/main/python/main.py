@@ -3,9 +3,9 @@ from typing import Optional
 from fbs_runtime.application_context import cached_property
 from fbs_runtime.application_context.PySide2 import ApplicationContext
 from PySide2.QtCore import QObject, QTimer, Qt, Signal
-from PySide2.QtGui import QCloseEvent, QImage, QPainter, QPixmap
-from PySide2.QtSvg import QSvgRenderer, QSvgWidget
-from PySide2.QtWidgets import QAction, QFrame, QGridLayout, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
+from PySide2.QtGui import QCloseEvent
+from PySide2.QtSvg import QSvgWidget
+from PySide2.QtWidgets import QAction, QFrame, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
 from QtDesign.QtdUiTools import loadUi
 
 import itertools
@@ -106,7 +106,7 @@ class ArduinoDesign(QMainWindow):
         self.timer.start(10000)
 
     def setup_ui(self):
-        loadUi(self.context.get_resource("arduino_design.ui"), self)
+        loadUi(self.context.get_resource("devino_utility.ui"), self)
 
         self.btn_send: QPushButton
         self.frm_arduino_svg: QFrame
