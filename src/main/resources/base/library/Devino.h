@@ -10,14 +10,14 @@
 
 class Devino {
   public:
-    Devino(bool commandsEnabled);
+    Devino(unsigned long baud);
     uint16_t readAnalog(uint8_t pin);
     uint8_t readDigital(uint8_t pin);
     void writeAnalog(uint8_t pin, uint8_t val);
     void writeDigital(uint8_t pin, uint8_t val);
       void processCommands(void);
   private:
-    bool _commandsEnabled;
+    int _disabledPins[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     void runCommand(char* cmdLn);
 };
 

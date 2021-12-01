@@ -6,8 +6,8 @@
 #include "Arduino.h"
 #include "Devino.h"
 
-Devino::Devino(bool commandsEnabled) {
-  _commandsEnabled = commandsEnabled;
+Devino::Devino(unsigned long baud) {
+  Serial.begin(baud);
 }
 
 
@@ -67,12 +67,24 @@ void Devino::runCommand(char* cmdLn) {
   }
 
   if(strcmp(cmd.fn, "set")==0) {
-    if(strcmp(cmd.arg1, "a")==0) writeAnalog(atoi(cmd.arg2), atoi(cmd.arg3));
-    else if(strcmp(cmd.arg1, "d")==0) writeDigital(atoi(cmd.arg2), atoi(cmd.arg3));
+    if(strcmp(cmd.arg1, "a")==0) {
+      analogWrite(atoi(cmd.arg2), atoi(cmd.arg3));
+      _disabledPins[atoi(cmd.arg2)] = 1;
+    }
+    else if(strcmp(cmd.arg1, "d")==0) {
+      writeDigital(atoi(cmd.arg2), atoi(cmd.arg3));
+      _disabledPins[atoi(cmd.arg2)] = 1;
+    }
   }
   else if(strcmp(cmd.fn, "get")==0) {
-    if(strcmp(cmd.arg1, "a")==0) readAnalog(atoi(cmd.arg2));
-    else if(strcmp(cmd.arg1, "d")==0) readDigital(atoi(cmd.arg2));
+    if(strcmp(cmd.arg1, "a")==0) {
+      readAnalog(atoi(cmd.arg2));
+      _disabledPins[atoi(cmd.arg2)] = 0;
+    }
+    else if(strcmp(cmd.arg1, "d")==0) {
+      readDigital(atoi(cmd.arg2));
+      _disabledPins[atoi(cmd.arg2)] = 0;
+    }
   }
 }
 
@@ -100,18 +112,22 @@ uint8_t Devino::readDigital(uint8_t pin) {
 
 
 void Devino::writeAnalog(uint8_t pin, uint8_t val) {
-  analogWrite(pin, val);
-  
-  char buffer[32];
-  sprintf(buffer, "<WA%d %d>", pin, val);
-  Serial.print(buffer);
+  if(_disabledPins[pin] == 0) {
+    analogWrite(pin, val);
+    
+    char buffer[32];
+    sprintf(buffer, "<WA%d %d>", pin, val);
+    Serial.print(buffer);
+  }
 }
 
 
 void Devino::writeDigital(uint8_t pin, uint8_t val) {
-  digitalWrite(pin, val);
-  
-  char buffer[32];
-  sprintf(buffer, "<WD%d %d>", pin, val);
-  Serial.print(buffer);
+  if(_disabledPins[pin] == 0) {
+    digitalWrite(pin, val);
+    
+    char buffer[32];
+    sprintf(buffer, "<WD%d %d>", pin, val);
+    Serial.print(buffer);
+  }
 }

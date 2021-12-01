@@ -169,13 +169,11 @@ class ArduinoDesign(QMainWindow):
         if not os.path.isdir(root_path): root_path = os.path.expanduser('~')
 
         folder = QFileDialog.getExistingDirectory(self, "Select Directory", root_path, QFileDialog.ShowDirsOnly)
-        if folder is not None:
+        if len(folder) > 0 and os.path.isdir(folder):
             lib_dir = os.path.join(folder, "Devino")
             if not os.path.isdir(lib_dir): os.mkdir(lib_dir)
             shutil.copy(self.context.get_resource("library/Devino.cpp"), lib_dir)
             shutil.copy(self.context.get_resource("library/Devino.h"), lib_dir)
-
-                
 
     def set_serial(self, port: QAction):
         if port.isChecked():
