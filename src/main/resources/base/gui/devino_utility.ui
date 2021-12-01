@@ -1767,6 +1767,13 @@ QPushButton:pressed {
     </widget>
     <addaction name="mnu_port"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="act_save_lib"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="mnu_tools"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -1784,6 +1791,11 @@ QPushButton:pressed {
    </property>
    <property name="text">
     <string>Serial Ports</string>
+   </property>
+  </action>
+  <action name="act_save_lib">
+   <property name="text">
+    <string>Save Library...</string>
    </property>
   </action>
  </widget>

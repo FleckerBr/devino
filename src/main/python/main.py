@@ -1,17 +1,19 @@
-import re
+from serial.serialutil import SerialException
 from typing import Optional
 from fbs_runtime.application_context import cached_property
 from fbs_runtime.application_context.PySide2 import ApplicationContext
 from PySide2.QtCore import QObject, QTimer, Qt, Signal
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtSvg import QSvgWidget
-from PySide2.QtWidgets import QAction, QFrame, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
+from PySide2.QtWidgets import QAction, QFileDialog, QFrame, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
 from QtDesign.QtdUiTools import loadUi
 
 import itertools
+import os
+import re
 import serial
-from serial.serialutil import SerialException
 import serial.tools.list_ports as serial_ports
+import shutil
 
 
 class AppContext(ApplicationContext):
@@ -106,8 +108,9 @@ class ArduinoDesign(QMainWindow):
         self.timer.start(10000)
 
     def setup_ui(self):
-        loadUi(self.context.get_resource("devino_utility.ui"), self)
+        loadUi(self.context.get_resource("gui/devino_utility.ui"), self)
 
+        self.act_save_lib: QAction
         self.btn_send: QPushButton
         self.frm_arduino_svg: QFrame
         self.lbl_arduino: QLabel
@@ -118,10 +121,11 @@ class ArduinoDesign(QMainWindow):
         self.mnu_port: QMenu
         self.act_none: QAction
 
+        self.act_save_lib.triggered.connect(self.save_lib)
         self.mnu_port.triggered[QAction].connect(self.set_serial)
 
         # Add Arduino Uno Reference Image
-        self.svg_arduino_uno = QSvgWidget(self.context.get_resource("ArduinoUno.svg"))
+        self.svg_arduino_uno = QSvgWidget(self.context.get_resource("images/ArduinoUno.svg"))
         self.svg_arduino_uno.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
         self.svg_arduino_uno.setMinimumWidth(256)
         self.frm_arduino_svg.layout().addWidget(self.svg_arduino_uno)
@@ -159,6 +163,19 @@ class ArduinoDesign(QMainWindow):
             "A10": (self.sbx_d10_pwm, self.swgt_d10),
             "A11": (self.sbx_d11_pwm, self.swgt_d11)
         }
+
+    def save_lib(self):
+        root_path = os.path.join(os.path.expanduser('~'), "Documents", "Arduino")
+        if not os.path.isdir(root_path): root_path = os.path.expanduser('~')
+
+        folder = QFileDialog.getExistingDirectory(self, "Select Directory", root_path, QFileDialog.ShowDirsOnly)
+        if folder is not None:
+            lib_dir = os.path.join(folder, "Devino")
+            if not os.path.isdir(lib_dir): os.mkdir(lib_dir)
+            shutil.copy(self.context.get_resource("library/Devino.cpp"), lib_dir)
+            shutil.copy(self.context.get_resource("library/Devino.h"), lib_dir)
+
+                
 
     def set_serial(self, port: QAction):
         if port.isChecked():
