@@ -15,7 +15,7 @@ class Devino {
     uint8_t readDigital(uint8_t pin);
     void writeAnalog(uint8_t pin, uint8_t val);
     void writeDigital(uint8_t pin, uint8_t val);
-      void processCommands(void);
+    void processCommands(void);
   private:
     bool _transmit;
     int _enabledPins[14] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};

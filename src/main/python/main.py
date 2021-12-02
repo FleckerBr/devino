@@ -3,9 +3,9 @@ from typing import Optional
 from fbs_runtime.application_context import cached_property
 from fbs_runtime.application_context.PySide2 import ApplicationContext
 from PySide2.QtCore import QObject, QTimer, Qt, Signal
-from PySide2.QtGui import QCloseEvent
+from PySide2.QtGui import QCloseEvent, QMouseEvent
 from PySide2.QtSvg import QSvgWidget
-from PySide2.QtWidgets import QAction, QFileDialog, QFrame, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
+from PySide2.QtWidgets import QAction, QApplication, QFileDialog, QFrame, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
 from QtDesign.QtdUiTools import loadUi
 
 import itertools
@@ -264,7 +264,10 @@ class ArduinoDesign(QMainWindow):
         stacked_widget = pwm_widgets[2]
 
         if spinbox is not None:
-            spinbox.setValue(int(data.split(" ")[1]))
+            if not spinbox.hasFocus():
+                spinbox.blockSignals(True)
+                spinbox.setValue(int(data.split(" ")[1]))
+                spinbox.blockSignals(False)
             if not stacked_widget.currentIndex() == 1:
                 stacked_widget.setCurrentIndex(1)
                 spinbox.setEnabled(True)
@@ -313,6 +316,13 @@ class ArduinoDesign(QMainWindow):
             read_button.setFlat(False)
             if pwm_spinbox.hasFocus(): pwm_spinbox.clearFocus()
             self.send_message(bytes("<set a {} {}>".format(pin, pwm_spinbox.value()), 'utf-8'))
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        focused = QApplication.focusWidget()
+        if not focused is None:
+            focused.clearFocus()
+
+        return super().mousePressEvent(event)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         return super().closeEvent(event)
