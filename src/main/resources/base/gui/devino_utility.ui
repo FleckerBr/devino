@@ -1710,6 +1710,9 @@ QPushButton:pressed {
        </item>
        <item row="1" column="0" colspan="2">
         <widget class="QGroupBox" name="gb_serial_monitor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="title">
           <string>Serial Monitor</string>
          </property>

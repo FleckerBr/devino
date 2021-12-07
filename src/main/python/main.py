@@ -5,7 +5,7 @@ from fbs_runtime.application_context.PySide2 import ApplicationContext
 from PySide2.QtCore import QObject, QTimer, Qt, Signal
 from PySide2.QtGui import QCloseEvent, QMouseEvent
 from PySide2.QtSvg import QSvgWidget
-from PySide2.QtWidgets import QAction, QApplication, QFileDialog, QFrame, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
+from PySide2.QtWidgets import QAction, QApplication, QFileDialog, QFrame, QGroupBox, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
 from QtDesign.QtdUiTools import loadUi
 
 import itertools
@@ -113,6 +113,7 @@ class ArduinoDesign(QMainWindow):
         self.act_save_lib: QAction
         self.btn_send: QPushButton
         self.frm_arduino_svg: QFrame
+        self.gb_serial_monitor: QGroupBox
         self.lbl_arduino: QLabel
         self.le_sender: QLineEdit
         self.te_serial_monitor: QTextEdit
@@ -205,7 +206,13 @@ class ArduinoDesign(QMainWindow):
                 act_port.setChecked(False)
             
             port.setChecked(True)
+            self.setup_serial()
+
+            self.gb_serial_monitor.setDisabled(False)
         else:
+            self.gb_serial_monitor.setDisabled(True)
+            self.le_sender.setText("")
+
             self.serial_manager.stop()
             self.list_serial()
 
@@ -252,11 +259,13 @@ class ArduinoDesign(QMainWindow):
             self.print_message(msg_str)
 
     def print_message(self, msg: str):
-        self.te_serial_monitor.insertPlainText(msg)
+        if len(msg) > 0: self.te_serial_monitor.insertPlainText(msg)
 
     def update_analog_display(self, data: str):
-        line_edit = self.analog_widgets.get(data.split(" ")[0][1:], (None, None))[1]
-        if line_edit is not None and not line_edit.text() == data.split(" ")[1]: line_edit.setText(data.split(" ")[1])
+        analog_widgets = self.analog_widgets.get(data.split(" ")[0][1:], (None, None))
+        line_edit = analog_widgets[1]
+        if line_edit is not None and not line_edit.text() == data.split(" ")[1]:
+            line_edit.setText(data.split(" ")[1])
 
     def update_pwm_display(self, data: str):
         pwm_widgets = self.pwm_widgets.get(data.split(" ")[0][1:], (None, None, None))
@@ -288,13 +297,13 @@ class ArduinoDesign(QMainWindow):
         button = self.analog_widgets.get(pin, (None, None))[0]
         if button is not None:
             button.setFlat(True)
-            self.send_message(bytes("<get a {}>".format(pin[1:]), 'utf-8'))
+            self.serial_manager.write(bytes("<get a {}>".format(pin[1:]), 'utf-8'))
 
     def read_digital(self, pin: str):
         button = self.digital_widgets.get(pin, (None, None, None))[0]
         if button is not None:
             button.setFlat(True)
-            self.send_message(bytes("<get d {}>".format(pin[1:]), 'utf-8'))
+            self.serial_manager.write(bytes("<get d {}>".format(pin[1:]), 'utf-8'))
 
     def write_digital(self, pin: int):
         digital_widgets = self.digital_widgets.get(f"D{pin}", None)
@@ -305,7 +314,7 @@ class ArduinoDesign(QMainWindow):
             read_button.setFlat(False)
             button_text = mode_button.text()
             mode_button.setText("HIGH" if button_text == "LOW" else "LOW")
-            self.send_message(bytes("<set d {} {}>".format(pin, 0 if button_text == "HIGH" else 1), 'utf-8'))
+            self.serial_manager.write(bytes("<set d {} {}>".format(pin, 0 if button_text == "HIGH" else 1), 'utf-8'))
 
     def write_pwm(self, pin: int):
         pwm_widgets = self.pwm_widgets.get(f"A{pin}", None)
@@ -315,7 +324,7 @@ class ArduinoDesign(QMainWindow):
 
             read_button.setFlat(False)
             if pwm_spinbox.hasFocus(): pwm_spinbox.clearFocus()
-            self.send_message(bytes("<set a {} {}>".format(pin, pwm_spinbox.value()), 'utf-8'))
+            self.serial_manager.write(bytes("<set a {} {}>".format(pin, pwm_spinbox.value()), 'utf-8'))
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         focused = QApplication.focusWidget()
