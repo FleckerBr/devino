@@ -5,7 +5,21 @@ from fbs_runtime.application_context.PySide2 import ApplicationContext
 from PySide2.QtCore import QObject, QTimer, Qt, Signal
 from PySide2.QtGui import QCloseEvent, QMouseEvent
 from PySide2.QtSvg import QSvgWidget
-from PySide2.QtWidgets import QAction, QApplication, QFileDialog, QFrame, QGroupBox, QLabel, QLineEdit, QMainWindow, QMenu, QPushButton, QSpinBox, QStackedWidget, QTextEdit
+from PySide2.QtWidgets import (
+    QAction,
+    QApplication,
+    QFileDialog,
+    QFrame,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMenu,
+    QPushButton,
+    QSpinBox,
+    QStackedWidget,
+    QTextEdit,
+)
 from QtDesign.QtdUiTools import loadUi
 
 import itertools
@@ -17,7 +31,6 @@ import shutil
 
 
 class AppContext(ApplicationContext):
-    
     def run(self):
         self.arduino_design.show()
         return self.app.exec_()
@@ -46,7 +59,7 @@ class SerialManager(QObject):
         self.start()
 
     def start(self):
-        self.arduino = serial.Serial(port = self._port, baudrate = 115200, timeout = 0.01)
+        self.arduino = serial.Serial(port=self._port, baudrate=115200, timeout=0.01)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self._receive)
@@ -69,7 +82,8 @@ class SerialManager(QObject):
 
     def read(self):
         try:
-            if not self.arduino.isOpen(): self.start()
+            if not self.arduino.isOpen():
+                self.start()
             return self.arduino.readline()
         except SerialException:
             self.timer.stop()
@@ -77,16 +91,16 @@ class SerialManager(QObject):
 
     def write(self, msg: str):
         try:
-            if not self.arduino.isOpen(): self.start()
+            if not self.arduino.isOpen():
+                self.start()
             self.arduino.write(msg)
         except SerialException as exc:
             self.timer.stop()
             self.arduino.close()
-            self.received.emit("SerialException: {}\n".format(str(exc)).encode('utf-8'))
+            self.received.emit("SerialException: {}\n".format(str(exc)).encode("utf-8"))
 
 
 class ArduinoDesign(QMainWindow):
-
     def __init__(self, context: AppContext) -> None:
         super().__init__()
 
@@ -126,12 +140,13 @@ class ArduinoDesign(QMainWindow):
         self.mnu_port.triggered[QAction].connect(self.set_serial)
 
         # Add Arduino Uno Reference Image
-        self.svg_arduino_uno = QSvgWidget(self.context.get_resource("images/ArduinoUno.svg"))
+        self.svg_arduino_uno = QSvgWidget(
+            self.context.get_resource("images/ArduinoUno.svg")
+        )
         self.svg_arduino_uno.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
         self.svg_arduino_uno.setMinimumWidth(256)
         self.frm_arduino_svg.layout().addWidget(self.svg_arduino_uno)
 
-        
         self.btn_a0.clicked.connect(lambda: self.read_analog("A0"))
         self.btn_a1.clicked.connect(lambda: self.read_analog("A1"))
         self.btn_a2.clicked.connect(lambda: self.read_analog("A2"))
@@ -159,10 +174,12 @@ class ArduinoDesign(QMainWindow):
             "A2": (self.btn_a2, self.le_a2),
             "A3": (self.btn_a3, self.le_a3),
             "A4": (self.btn_a4, self.le_a4),
-            "A5": (self.btn_a5, self.le_a5)
+            "A5": (self.btn_a5, self.le_a5),
         }
 
-        self.digital_widgets: dict[str, tuple[QPushButton, QPushButton, Optional[QStackedWidget]]] = {
+        self.digital_widgets: dict[
+            str, tuple[QPushButton, QPushButton, Optional[QStackedWidget]]
+        ] = {
             "D2": (self.btn_d2, self.btn_d2_mode, None),
             "D3": (self.btn_d3, self.btn_d3_mode, self.swgt_d3),
             "D4": (self.btn_d4, self.btn_d4_mode, None),
@@ -174,7 +191,7 @@ class ArduinoDesign(QMainWindow):
             "D10": (self.btn_d10, self.btn_d10_mode, self.swgt_d10),
             "D11": (self.btn_d11, self.btn_d11_mode, self.swgt_d11),
             "D12": (self.btn_d12, self.btn_d12_mode, None),
-            "D13": (self.btn_d13, self.btn_d13_mode, None)
+            "D13": (self.btn_d13, self.btn_d13_mode, None),
         }
 
         self.pwm_widgets: dict[str, tuple[QPushButton, QSpinBox, QStackedWidget]] = {
@@ -183,17 +200,21 @@ class ArduinoDesign(QMainWindow):
             "A6": (self.btn_d6, self.sbx_d6_pwm, self.swgt_d6),
             "A9": (self.btn_d9, self.sbx_d9_pwm, self.swgt_d9),
             "A10": (self.btn_d10, self.sbx_d10_pwm, self.swgt_d10),
-            "A11": (self.btn_d11, self.sbx_d11_pwm, self.swgt_d11)
+            "A11": (self.btn_d11, self.sbx_d11_pwm, self.swgt_d11),
         }
 
     def save_lib(self):
-        root_path = os.path.join(os.path.expanduser('~'), "Documents", "Arduino")
-        if not os.path.isdir(root_path): root_path = os.path.expanduser('~')
+        root_path = os.path.join(os.path.expanduser("~"), "Documents", "Arduino")
+        if not os.path.isdir(root_path):
+            root_path = os.path.expanduser("~")
 
-        folder = QFileDialog.getExistingDirectory(self, "Select Directory", root_path, QFileDialog.ShowDirsOnly)
+        folder = QFileDialog.getExistingDirectory(
+            self, "Select Directory", root_path, QFileDialog.ShowDirsOnly
+        )
         if len(folder) > 0 and os.path.isdir(folder):
             lib_dir = os.path.join(folder, "Devino")
-            if not os.path.isdir(lib_dir): os.mkdir(lib_dir)
+            if not os.path.isdir(lib_dir):
+                os.mkdir(lib_dir)
             shutil.copy(self.context.get_resource("library/Devino.cpp"), lib_dir)
             shutil.copy(self.context.get_resource("library/Devino.h"), lib_dir)
 
@@ -204,7 +225,7 @@ class ArduinoDesign(QMainWindow):
 
             for act_port in self.serial_ports:
                 act_port.setChecked(False)
-            
+
             port.setChecked(True)
             self.setup_serial()
 
@@ -217,11 +238,16 @@ class ArduinoDesign(QMainWindow):
             self.list_serial()
 
     def setup_serial(self):
-        self.btn_send.clicked.connect(lambda: self.send_message(bytes(self.le_sender.text(), 'utf-8')))
-        self.le_sender.returnPressed.connect(lambda: self.send_message(bytes(self.le_sender.text(), 'utf-8')))
+        self.btn_send.clicked.connect(
+            lambda: self.send_message(bytes(self.le_sender.text(), "utf-8"))
+        )
+        self.le_sender.returnPressed.connect(
+            lambda: self.send_message(bytes(self.le_sender.text(), "utf-8"))
+        )
 
     def list_serial(self):
-        for action in self.serial_ports: self.mnu_port.removeAction(action)
+        for action in self.serial_ports:
+            self.mnu_port.removeAction(action)
         self.mnu_port.setTitle(f"Port: None")
         self.serial_ports = []
 
@@ -245,21 +271,29 @@ class ArduinoDesign(QMainWindow):
 
     def parse_message(self, msg: bytes):
         try:
-            msg_str = msg.decode('utf-8')
+            msg_str = msg.decode("utf-8")
         except UnicodeDecodeError:
             pass
         else:
-            for data in list(itertools.chain.from_iterable(data.split(",") for data in re.findall(r"<(.*?)>", msg_str))):
-                if data[:2] == "RA": self.update_analog_display(data)
-                elif data[:2] == "WA": self.update_pwm_display(data)
-                elif data[1] == "D": self.update_digital_display(data, data[0] == "W")
+            for data in list(
+                itertools.chain.from_iterable(
+                    data.split(",") for data in re.findall(r"<(.*?)>", msg_str)
+                )
+            ):
+                if data[:2] == "RA":
+                    self.update_analog_display(data)
+                elif data[:2] == "WA":
+                    self.update_pwm_display(data)
+                elif data[1] == "D":
+                    self.update_digital_display(data, data[0] == "W")
 
                 msg_str = msg_str.replace(f"<{data}>", "")
 
             self.print_message(msg_str)
 
     def print_message(self, msg: str):
-        if len(msg) > 0: self.te_serial_monitor.insertPlainText(msg)
+        if len(msg) > 0:
+            self.te_serial_monitor.insertPlainText(msg)
 
     def update_analog_display(self, data: str):
         analog_widgets = self.analog_widgets.get(data.split(" ")[0][1:], (None, None))
@@ -284,7 +318,9 @@ class ArduinoDesign(QMainWindow):
                 spinbox.valueChanged.connect(lambda: self.write_pwm(data[2]))
 
     def update_digital_display(self, data: str, writeable: bool):
-        digital_widgets = self.digital_widgets.get(data.split(" ")[0][1:], (None, None, None))
+        digital_widgets = self.digital_widgets.get(
+            data.split(" ")[0][1:], (None, None, None)
+        )
         button = digital_widgets[1]
 
         if button is not None:
@@ -297,13 +333,13 @@ class ArduinoDesign(QMainWindow):
         button = self.analog_widgets.get(pin, (None, None))[0]
         if button is not None:
             button.setFlat(True)
-            self.serial_manager.write(bytes("<get a {}>".format(pin[1:]), 'utf-8'))
+            self.serial_manager.write(bytes("<get a {}>".format(pin[1:]), "utf-8"))
 
     def read_digital(self, pin: str):
         button = self.digital_widgets.get(pin, (None, None, None))[0]
         if button is not None:
             button.setFlat(True)
-            self.serial_manager.write(bytes("<get d {}>".format(pin[1:]), 'utf-8'))
+            self.serial_manager.write(bytes("<get d {}>".format(pin[1:]), "utf-8"))
 
     def write_digital(self, pin: int):
         digital_widgets = self.digital_widgets.get(f"D{pin}", None)
@@ -314,7 +350,12 @@ class ArduinoDesign(QMainWindow):
             read_button.setFlat(False)
             button_text = mode_button.text()
             mode_button.setText("HIGH" if button_text == "LOW" else "LOW")
-            self.serial_manager.write(bytes("<set d {} {}>".format(pin, 0 if button_text == "HIGH" else 1), 'utf-8'))
+            self.serial_manager.write(
+                bytes(
+                    "<set d {} {}>".format(pin, 0 if button_text == "HIGH" else 1),
+                    "utf-8",
+                )
+            )
 
     def write_pwm(self, pin: int):
         pwm_widgets = self.pwm_widgets.get(f"A{pin}", None)
@@ -323,8 +364,11 @@ class ArduinoDesign(QMainWindow):
             pwm_spinbox = pwm_widgets[1]
 
             read_button.setFlat(False)
-            if pwm_spinbox.hasFocus(): pwm_spinbox.clearFocus()
-            self.serial_manager.write(bytes("<set a {} {}>".format(pin, pwm_spinbox.value()), 'utf-8'))
+            if pwm_spinbox.hasFocus():
+                pwm_spinbox.clearFocus()
+            self.serial_manager.write(
+                bytes("<set a {} {}>".format(pin, pwm_spinbox.value()), "utf-8")
+            )
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         focused = QApplication.focusWidget()
@@ -336,6 +380,7 @@ class ArduinoDesign(QMainWindow):
     def closeEvent(self, event: QCloseEvent) -> None:
         return super().closeEvent(event)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app_context = AppContext()
     app_context.run()
