@@ -1,6 +1,6 @@
 /*
   Devino.h - Library for debugging/developing Arduino code.
-  Created by Bryton Flecler.
+  Created by Bryton Flecker.
 */
 
 #ifndef Devino_h

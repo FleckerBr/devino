@@ -1,6 +1,6 @@
 /*
   Devino.cpp - Library for debugging/developing Arduino code.
-  Created by Bryton Flecler.
+  Created by Bryton Flecker.
 */
 
 #include "Arduino.h"
@@ -95,7 +95,7 @@ uint16_t Devino::readAnalog(uint8_t pin) {
   if(_transmit) {
     char buffer[32];
     sprintf(buffer, "<RA%d %u>", pin, val);
-    Serial.print(buffer);
+    Serial.println(buffer);
   }
 
   return val;
@@ -108,7 +108,7 @@ uint8_t Devino::readDigital(uint8_t pin) {
   if(_transmit) {
     char buffer[32];
     sprintf(buffer, "<RD%d %d>", pin, val);
-    Serial.print(buffer);
+    Serial.println(buffer);
   }
 
   return val;
@@ -122,7 +122,7 @@ void Devino::writeAnalog(uint8_t pin, uint8_t val) {
     if(_transmit) {
       char buffer[32];
       sprintf(buffer, "<WA%d %d>", pin, val);
-      Serial.print(buffer);
+      Serial.println(buffer);
     }
   }
 }
@@ -135,7 +135,7 @@ void Devino::writeDigital(uint8_t pin, uint8_t val) {
     if(_transmit) {
       char buffer[32];
       sprintf(buffer, "<WD%d %d>", pin, val);
-      Serial.print(buffer);
+      Serial.println(buffer);
     }
   }
 }
