@@ -1,0 +1,21 @@
+{
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+    "editor.formatOnSave": true,
+    "files.watcherExclude": {
+        "/target/**": true
+    },
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
+    "python.analysis.autoSearchPaths": false,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/src/"
+    ],
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+}

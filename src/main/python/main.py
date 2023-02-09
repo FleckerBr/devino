@@ -1,8 +1,13 @@
-from serial.serialutil import SerialException
+import itertools
+import os
+import re
+import shutil
 from typing import Optional
+
+import serial.tools.list_ports as serial_ports
 from fbs_runtime.application_context import cached_property
 from fbs_runtime.application_context.PySide2 import ApplicationContext
-from PySide2.QtCore import QObject, QTimer, Qt, Signal
+from PySide2.QtCore import QObject, Qt, QTimer, Signal
 from PySide2.QtGui import QCloseEvent, QMouseEvent
 from PySide2.QtSvg import QSvgWidget
 from PySide2.QtWidgets import (
@@ -21,13 +26,8 @@ from PySide2.QtWidgets import (
     QTextEdit,
 )
 from QtDesign.QtdUiTools import loadUi
-
-import itertools
-import os
-import re
-import serial
-import serial.tools.list_ports as serial_ports
-import shutil
+from serial import Serial
+from serial.serialutil import SerialException
 
 
 class AppContext(ApplicationContext):
@@ -45,9 +45,9 @@ class SerialManager(QObject):
 
     def __init__(self, port: str = "") -> None:
         super().__init__()
-        self.arduino = None
-        self._port = port
-        self.timer = None
+        self.arduino: Optional[Serial] = None
+        self._port: str = port
+        self.timer: Optional[QTimer] = None
 
     @property
     def port(self):
@@ -59,7 +59,7 @@ class SerialManager(QObject):
         self.start()
 
     def start(self):
-        self.arduino = serial.Serial(port=self._port, baudrate=115200, timeout=0.01)
+        self.arduino = Serial(port=self._port, baudrate=115200, timeout=0.01)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self._receive)
@@ -81,6 +81,9 @@ class SerialManager(QObject):
             self.received.emit(data)
 
     def read(self):
+        if self.arduino is None:
+            return None
+
         try:
             if not self.arduino.isOpen():
                 self.start()
@@ -90,6 +93,9 @@ class SerialManager(QObject):
             self.arduino.close()
 
     def write(self, msg: str):
+        if self.arduino is None:
+            return None
+
         try:
             if not self.arduino.isOpen():
                 self.start()
