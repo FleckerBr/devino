@@ -119,10 +119,6 @@ class ArduinoDesign(QMainWindow):
         self.setup_ui()
         self.list_serial()
 
-        if len(self.serial_ports) > 0:
-            self.serial_ports[0].setChecked(True)
-            self.set_serial(self.serial_ports[0])
-
         self.timer = QTimer()
         self.timer.timeout.connect(self.list_serial)
         self.timer.start(10000)
@@ -257,9 +253,11 @@ class ArduinoDesign(QMainWindow):
         self.mnu_port.setTitle(f"Port: None")
         self.serial_ports = []
 
+        arduino_port = None
         for port, desc, hwid in sorted(serial_ports.comports()):
             if "VID:PID=2A03:0043" in hwid or "VID:PID=2341:0043" in hwid:
                 action = QAction(f"{port} (Arduino Uno)")
+                arduino_port = action
             else:
                 action = QAction(f"{port}")
 
@@ -270,6 +268,10 @@ class ArduinoDesign(QMainWindow):
             if port == self.serial_manager.port:
                 action.setChecked(True)
                 self.mnu_port.setTitle(f"Port: {self.serial_manager.port}")
+
+        if self.serial_manager.port is None and arduino_port is not None:
+            arduino_port.setChecked(True)
+            self.set_serial(arduino_port)
 
     def send_message(self, msg: bytes):
         self.le_sender.setText("")
